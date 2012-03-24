@@ -1,0 +1,2 @@
+#!/bin/bash
+keytool -genkey -keyalg RSA -keysize 2048 -alias alias -keystore keystore.jks -keypass keypass -storepass storepass

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Webcam applet sample page</title>
+    </head>
+    <body>
+        <h1>Webcam applet test page</h1>
+        <script type="text/javascript">
+            function displayMessage(message) {
+                var messagesDiv = document.getElementById("messages");
+                var newMessage = document.createElement("div");
+                newMessage.textContent = message;
+                messagesDiv.appendChild(newMessage);
+            };
+            function startCapture() {
+                webcam.startCapture();
+            };
+            function stopCapture() {
+                webcam.stopCapture();
+            };
+            function displayImage(url) {
+                var imageDiv = document.getElementById("image");
+                imageDiv.innerHTML = "";
+                var img = document.createElement("img");
+                img.setAttribute("src",url);
+                imageDiv.appendChild(img);
+            };
+            
+            function sendSnapshot() {
+                webcam.sendImage({
+                    url: "uploadImage",
+                    format:'png', 
+                    callback : { fn: captureResult, scope: window, arg: null}
+                });  
+            };
+            function captureResult(result) {
+            	displayMessage("Send snapshot result: "+result);
+            };
+            function localSnapshot() {
+                webcam.createImageUrl({
+                    callback: {
+                        fn: displayImage
+                    }
+                });
+            };
+            function createBarCode() {
+                var textArea = document.getElementById('textarea');
+                var imgUrl = webcam.createBarCodeUrl({
+                    content: textArea.value
+                });
+                displayImage(imgUrl);
+            };
+            function barCodeDetected(code) {
+                displayMessage("Bar code detected: "+code);
+            };
+            function appletInit() {
+                webcam.setBarCodeCallback({
+                    fn: barCodeDetected
+                });
+                displayMessage("Applet is initialized correctly.");
+            };
+        </script>
+        <applet id="webcam" code="dummy" width="640" height="480">
+        	<param name="codebase_lookup" value="false"/>
+        	<param name="jnlp_href" value="Webcam.jnlp" />
+        	<param name="initEval" value="appletInit()">
+        </applet>
+        <br/>
+        <button onclick="startCapture();">Start capture</button>
+        <button onclick="stopCapture();">Stop capture</button>
+        <button onclick="localSnapshot();">Take a local snapshot</button>
+        <button onclick="sendSnapshot();">Send snapshot to server</button>
+        <br/><br/>
+        <textarea id='textarea' rows="10" cols="50"></textarea><br />
+        <button onclick="createBarCode();">Generate barcode</button><br/>
+        <br/>
+        <div id="image"></div><br/>
+        <div id="messages"></div>
+        <br />
+    </body>
+</html>

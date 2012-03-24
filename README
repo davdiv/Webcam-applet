@@ -1,0 +1,39 @@
+Webcam applet: gives access to the webcam from a web application.
+Copyright (C) 2012 divde (http://divde.free.fr)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+How to build and use:
+
+* First create a test certificate to sign the applet:
+
+ ./makecert
+
+* Then run the maven build
+
+ mvn clean install
+ 
+* Unzip the resulting zip file in some directory of your web
+server (here: /var/www/html/webcam):
+
+ unzip target/webcam-applet-1.0-SNAPSHOT.zip -d /var/www/html/webcam
+ 
+* Use the applet from your html page. A sample file is provided in sample:
+
+ cp src/sample/index.html /var/www/html/webcam/
+ 
+* Open the page with your favorite web browser:
+
+ firefox http://localhost/webcam
+
