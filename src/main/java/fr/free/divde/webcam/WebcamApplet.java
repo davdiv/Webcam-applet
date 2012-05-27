@@ -108,6 +108,16 @@ public class WebcamApplet extends JApplet {
 	@Override
 	public void destroy() {
 		webcam.stopCapture();
+		String destroyEval = getParameter("destroyEval");
+		if (window != null && destroyEval != null) {
+			synchronized (JSObject.class) {
+				try {
+					window.eval(destroyEval);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	private BarCodeListener initBarCodeListener() {

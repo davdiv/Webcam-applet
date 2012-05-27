@@ -13,6 +13,12 @@
                 newMessage.textContent = message;
                 messagesDiv.appendChild(newMessage);
             };
+            function hideApplet() {
+                webcam.style.display="none";
+            };
+            function displayApplet() {
+                webcam.style.display="block";
+            };
             function startCapture() {
                 webcam.startCapture();
             };
@@ -54,6 +60,9 @@
             function barCodeDetected(code) {
                 displayMessage("Bar code detected: "+code);
             };
+            function appletDestroy() {
+                displayMessage("Applet was destroyed.");
+            };
             function appletInit() {
                 webcam.setBarCodeCallback({
                     fn: barCodeDetected
@@ -65,12 +74,15 @@
         	<param name="codebase_lookup" value="false"/>
         	<param name="jnlp_href" value="Webcam.jnlp" />
         	<param name="initEval" value="appletInit()">
+        	<param name="destroyEval" value="appletDestroy()">
         </applet>
         <br/>
         <button onclick="startCapture();">Start capture</button>
         <button onclick="stopCapture();">Stop capture</button>
         <button onclick="localSnapshot();">Take a local snapshot</button>
         <button onclick="sendSnapshot();">Send snapshot to server</button>
+        <button onclick="hideApplet();">Hide applet</button>
+        <button onclick="displayApplet();">Display applet</button>
         <br/><br/>
         <textarea id='textarea' rows="10" cols="50"></textarea><br />
         <button onclick="createBarCode();">Generate barcode</button><br/>
