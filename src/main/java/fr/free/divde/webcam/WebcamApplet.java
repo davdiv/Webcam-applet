@@ -24,6 +24,9 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
 import javax.swing.JApplet;
@@ -62,6 +65,8 @@ public class WebcamApplet extends JApplet {
 	private ImageCapture imageCapture = new ImageCapture();
 
 	private volatile JSObject window;
+	private volatile JSObject getKeys;
+
 	@Getter
 	@Setter
 	private volatile long sameContentDelay = 500;
@@ -174,6 +179,39 @@ public class WebcamApplet extends JApplet {
 		}
 	}
 
+	private Map<String, Object> convertToMap(JSObject jsObject) {
+		if (getKeys == null) {
+			getKeys = (JSObject) window
+					.eval("(function(){var res=[];for(var key in this){if(this.hasOwnProperty(key)){res.push(key)}}return res;})");
+		}
+		JSObject keys = (JSObject) getKeys.call("call",
+				new Object[] { jsObject });
+		int size = ((Number) keys.getMember("length")).intValue();
+		HashMap<String, Object> res = new HashMap<String, Object>(size);
+		for (int i = 0; i < size; i++) {
+			String name = (String) keys.getSlot(i);
+			res.put(name, jsObject.getMember(name));
+		}
+		return res;
+	}
+
+	private Map<String, Object> getJSMapProperty(JSObject object,
+			String propertyName) {
+		JSObject value = (JSObject) getJSProperty(object, propertyName, null);
+		if (value != null) {
+			return convertToMap(value);
+		}
+		return new HashMap<String, Object>();
+	}
+
+	private static void setHeaders(URLConnection urlConnection,
+			Map<String, Object> headers) {
+		for (Entry<String, Object> entry : headers.entrySet()) {
+			urlConnection.setRequestProperty(entry.getKey().toLowerCase(),
+					entry.getValue().toString());
+		}
+	}
+
 	private void callJSLater(final JSObject callbackObject,
 			final Object... args) {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -188,8 +226,8 @@ public class WebcamApplet extends JApplet {
 		final String url = (String) parameters.getMember("url");
 		final String format = (String) getJSProperty(parameters, "format",
 				"png");
-		final String contentType = (String) getJSProperty(parameters,
-				"contentType", "image/png");
+		final Map<String, Object> headers = getJSMapProperty(parameters,
+				"headers");
 		final JSObject callback = (JSObject) getJSProperty(parameters,
 				"callback", null);
 		imageCapture.captureImage(new ImageListener() {
@@ -199,7 +237,12 @@ public class WebcamApplet extends JApplet {
 					URL urlObject = new URL(getDocumentBase(), url);
 					URLConnection connection = urlObject.openConnection();
 					connection.setDoOutput(true);
-					connection.setRequestProperty("Content-type", contentType);
+					setHeaders(connection, headers);
+					if (connection.getRequestProperty("content-type") == null) {
+						// default content type
+						connection.setRequestProperty("content-type", "image/"
+								+ format);
+					}
 					OutputStream out = connection.getOutputStream();
 					ImageIO.write(image, format, out);
 					out.flush();

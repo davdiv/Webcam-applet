@@ -37,7 +37,11 @@
                 webcam.sendImage({
                     url: "uploadImage",
                     format:'png', 
-                    callback : { fn: captureResult, scope: window, arg: null}
+                    callback : { fn: captureResult, scope: window, arg: null},
+                    headers:{
+                        'Cookie': document.cookie,
+                        'X-Requested-With': 'JavaWebcamApplet'
+                    }
                 });  
             };
             function captureResult(result) {
